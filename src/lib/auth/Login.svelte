@@ -50,6 +50,12 @@
 
 <div class="min-h-screen flex items-center justify-center">
   <div class="glass p-8 w-full max-w-md">
+
+    <h1 class="text-3xl text-white font-bold mb-6 text-center">DevParapalli's AI Video Analyzer</h1>
+    
+
+    <div class="bg-white/20 border border-white/30 px-4 py-6 rounded-md text-white/90 mb-4"> Use the credentials "<span class="text-green-300">subspace@parapalli.dev</span>" and "<span class="text-green-300">subspace</span>" for the test account.</div>
+
     <h2 class="text-2xl text-white font-bold mb-6 text-center">Welcome</h2>
     
     <form class="space-y-4" on:submit|preventDefault={handleLogin}>

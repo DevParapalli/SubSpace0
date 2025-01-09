@@ -1,7 +1,8 @@
-`<script lang="ts">
+<script lang="ts">
   import { onMount } from 'svelte';
   import { nhost } from './nhost';
   import { authStore } from './auth/AuthStore';
+import VideoHistory from './VideoHistory.svelte';
   
   let videoId = '';
   let customInstructions = '';
@@ -15,6 +16,21 @@
     thumbnail: '',
     channel: ''
   };
+
+  function extractYoutubeId(input) {
+    const patterns = [
+        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/,
+        /^[a-zA-Z0-9_-]{11}$/
+    ];
+
+    for (const pattern of patterns) {
+        const match = input.match(pattern);
+        if (match) {
+            return match[1] || match[0];
+        }
+    }
+    return null;
+}
 
   async function saveAnalysisState(status = 'in_progress') {
     if (!$authStore.user) return;
@@ -53,6 +69,8 @@
   async function handleSubmit() {
     if (!videoId) return;
     
+    videoId = extractYoutubeId(videoId)
+
     loading = true;
     try {
       // Save initial state
@@ -71,6 +89,7 @@
       });
 
       if (!response.ok) {
+        alert("Failed to process video!")
         throw new Error('Failed to analyze video');
       }
 
@@ -124,26 +143,50 @@
     }
   }
 
-  onMount(() => {
-    loadLastAnalysis();
-  });
+  function handleVideoSelect(video) {
+    videoId = video.video_id;
+    customInstructions = video.custom_instructions;
+    videoData = {
+      summary: video.summary,
+      title: video.title,
+      thumbnail: video.thumbnail,
+      channel: video.channel
+    };
+  }
+
+  // onMount(() => {
+  //   loadLastAnalysis();
+  // });
+
+  async function handleLogout() {
+    await nhost.auth.signOut()
+    // const authState = {
+    // isAuthenticated: !!session,
+    // user: session?.user || null,
+    // loading: false
+    // };
+    // authStore.set()
+  }
 </script>
+
+
 
 <div class="min-h-screen p-8">
   <div class="max-w-4xl mx-auto space-y-8">
+    <div class="px-4 py-8"><span class="text-white mr-4">Hello, {$authStore.user.displayName ?? "User"}</span> <button on:click="{handleLogout}" class="bg-red-500/30 px-4 py-2 text-white rounded-md hover:bg-red-500/70 active:bg-red-800/70 transition-colors">Logout</button> </div>
     <!-- Input Section -->
     <div class="glass p-6">
       <form class="space-y-4" on:submit|preventDefault={handleSubmit}>
-        <div>
-          <label class="block text-white mb-2" for="customInstructions">Custom Instructions</label>
-          <input
+         <div>
+          <label class="block text-white mb-2" for="customInstructions">Enter Video ID / Link</label>
+          <!-- <input
             id="customInstructions"
             type="text"
             bind:value={customInstructions}
             class="w-full p-2 rounded bg-white/10 border border-white/20 text-white focus:ring-2 focus:ring-blue-500 transition-all"
             placeholder="Optional instructions..."
           />
-        </div>
+        </div> -->
         
         <div class="flex gap-4">
           <input
@@ -194,5 +237,7 @@
         </div>
       </div>
     {/if}
+
+    <VideoHistory onVideoSelect={handleVideoSelect} />
   </div>
-</div>`
+</div>

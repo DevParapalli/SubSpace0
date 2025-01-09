@@ -8,10 +8,10 @@ export const authStore = writable({
 });
 
 // Initialize auth state from localStorage
-const savedAuth = localStorage.getItem('auth');
-if (savedAuth) {
-  authStore.set(JSON.parse(savedAuth));
-}
+// const savedAuth = localStorage.getItem('auth');
+// if (savedAuth) {
+//   authStore.set(JSON.parse(savedAuth));
+// }
 
 // Subscribe to auth state changes
 nhost.auth.onAuthStateChanged((event, session) => {
@@ -22,5 +22,5 @@ nhost.auth.onAuthStateChanged((event, session) => {
   };
   
   authStore.set(authState);
-  localStorage.setItem('auth', JSON.stringify(authState));
+  // localStorage.setItem('auth', JSON.stringify(authState));
 });
